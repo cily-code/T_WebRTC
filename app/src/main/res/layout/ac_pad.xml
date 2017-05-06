@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ac_pad"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.cily.utils.t_webrtc.pad.PadAc"
+    >
+
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true">
+
+        <TextView
+            style="@style/style_text_center_h"
+            android:text="@string/text_title"
+            android:textSize="@dimen/dp_textSize_large_v"
+            />
+
+        <TextView
+            style="@style/style_text_center_h"
+            android:layout_marginTop="@dimen/dp_10"
+            android:text="@string/text_please_input_room_num"/>
+
+        <EditText
+            android:id="@+id/ed_input_room_num_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            android:inputType="number"
+            android:hint="@string/text_please_input_room_num"
+            android:textSize="@dimen/dp_textSize_small"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_call"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="呼叫"
+                android:layout_marginRight="@dimen/dp_10"/>
+
+            <Button
+                android:id="@+id/btn_barcode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="扫码"
+                android:layout_marginLeft="@dimen/dp_10"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_set"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_logout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="退出"
+                android:layout_marginRight="@dimen/dp_10"/>
+
+            <Button
+                android:id="@+id/btn_setting"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="设置"
+                android:layout_marginLeft="@dimen/dp_10"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+
+</RelativeLayout>

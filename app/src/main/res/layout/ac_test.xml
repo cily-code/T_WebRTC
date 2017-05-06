@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ac_test"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.cily.utils.t_webrtc.TestAc">
+
+    <Button
+        android:id="@+id/btn_ws_conn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="连接WebSocket" />
+
+    <Button
+        android:id="@+id/btn_ws_regist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="注册" />
+
+    <Button
+        android:id="@+id/btn_ws_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="发送消息" />
+
+    <Button
+        android:id="@+id/btn_join_room"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="join room"
+        android:textAllCaps="false"/>
+
+    <Button
+        android:id="@+id/btn_create_peerConn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="创建PeerConnection"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btn_add_stream"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Stream"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btn_create_offer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create Offer"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btn_send_offer_sdp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send Offer SDP"
+        android:textAllCaps="false" />
+
+</LinearLayout>
