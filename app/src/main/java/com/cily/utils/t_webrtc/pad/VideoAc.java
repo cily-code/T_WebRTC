@@ -109,8 +109,6 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         initMedia();
 
         checkPermission();
-
-//        WsUtils.sendMsg(StrMsgUtils.agree(userRoom, roomId));
     }
 
     @Override
@@ -169,7 +167,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         localRender.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                toggleCallControlFragmentVisibility();
+                toggleCallControlFragmentVisibility();
             }
         });
 
@@ -177,7 +175,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         remoteRenderScreen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                toggleCallControlFragmentVisibility();
+                toggleCallControlFragmentVisibility();
             }
         });
 
@@ -271,7 +269,6 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         hudFragment.setCpuMonitor(cpuMonitor);
 
         init();
-
     }
 
     private IceCandidate iceCandi;
@@ -705,7 +702,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
 
     private Player player;
     private void play(){
-        if (BuildConfig.DEBUG && false){
+        if (BuildConfig.DEBUG){
             showToast("播放音乐");
         }else{
             if (player == null){
@@ -725,5 +722,24 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         if (player != null){
             player.release();
         }
+    }
+
+    private boolean callControlFragmentVisible = true;
+    private void toggleCallControlFragmentVisibility() {
+        if (!iceConnected || !callFragment.isAdded()) {
+            return;
+        }
+        // Show/hide call control fragment
+        callControlFragmentVisible = !callControlFragmentVisible;
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        if (callControlFragmentVisible) {
+            ft.show(callFragment);
+            ft.show(hudFragment);
+        } else {
+            ft.hide(callFragment);
+            ft.hide(hudFragment);
+        }
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.commit();
     }
 }
