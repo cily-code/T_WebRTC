@@ -290,12 +290,16 @@ public class Utils {
                             SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
                     if (events != null){
                         events.onRemoteDescription(sd);
+                        events.onRemoteIceCandidate(toJavaCandidate(json));
                     }
                 }
 
             }else if(TYPE_CANDIDATE.equals(type)){
                 if (events != null){
+                    SessionDescription sd = new SessionDescription(
+                            SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
                     events.onRemoteIceCandidate(toJavaCandidate(json));
+                    events.onRemoteDescription(sd);
                 }
             }
         }catch (JSONException e){
