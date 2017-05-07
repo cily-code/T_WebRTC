@@ -22,7 +22,7 @@ android {
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField("int", "TYPE_APP", "0");
+            buildConfigField("int", "TYPE_APP", "1");
             buildConfigField("String", "URL_ROOM", "\"http://119.23.251.238:8080\"");
         }
 

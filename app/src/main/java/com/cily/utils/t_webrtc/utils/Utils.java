@@ -206,7 +206,8 @@ public class Utils {
     }
 
     //OFFER或者Answer
-    public static SignalingParameters createSignalingParameters(String type, String clientId, boolean initiator){
+    public static SignalingParameters createSignalingParameters(String type, String clientId,
+                                                                boolean initiator, IceCandidate iceCandidate){
         LinkedList<PeerConnection.IceServer> iceServers = new LinkedList<>();
         iceServers.add(new PeerConnection.IceServer("turn:119.23.251.238:3478", "helloword", "helloword"));
 
@@ -214,8 +215,9 @@ public class Utils {
                 SessionDescription.Type.fromCanonicalForm(type), null);
 
         LinkedList<IceCandidate> iceCandidates = new LinkedList<IceCandidate>();
-        IceCandidate candidate = new IceCandidate(null, 0, null);
-        iceCandidates.add(candidate);
+        if (iceCandidate != null) {
+            iceCandidates.add(iceCandidate);
+        }
 
         SignalingParameters params = new SignalingParameters(iceServers, initiator,
                 clientId, WsUtils.URL_WS, Conf.URL_POST, offerSdp, iceCandidates);
@@ -225,13 +227,15 @@ public class Utils {
 
     public final static String TYPE_OFFER = "offer";
     public final static String TYPE_ANSWER = "answer";
+    public final static String TYPE_CANDIDATE = "candidate";
     public static void sendCall(boolean loopback, String userRoom, String roomId,
                                 SessionDescription sdp, IceCandidate candidate,
                                 boolean initiator,
                                 SignalingEvents events){
         CallBean b = new CallBean();
         b.setSdp(sdp.description);
-        b.setType(TYPE_OFFER);
+//        b.setType(TYPE_OFFER);
+        b.setType(TYPE_CANDIDATE);
         b.setId(candidate.sdpMid);
         b.setLabel(candidate.sdpMLineIndex);
         b.setCandidate(candidate.sdp);
@@ -276,27 +280,27 @@ public class Utils {
             JSONObject json = new JSONObject(msg);
             String type = json.optString("Type");
             if (TYPE_OFFER.equals(type)){
-                if (!initiator){
+                    events.onRemoteIceCandidate(toJavaCandidate(json));
+
                     SessionDescription sdp = new SessionDescription(
                             SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
                     if (events != null) {
                         events.onRemoteDescription(sdp);
                     }
 
-                    events.onRemoteIceCandidate(toJavaCandidate(json));
-                }
             }else if(TYPE_ANSWER.equals(type)){
-                if (initiator){
+
+                if (events != null){
+                    SessionDescription sd = new SessionDescription(
+                            SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
                     if (events != null){
-                        SessionDescription sd = new SessionDescription(
-                                SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
-                        if (events != null){
-                            events.onRemoteDescription(sd);
-                        }
+                        events.onRemoteDescription(sd);
                     }
                 }
-            }
 
+            }else if(TYPE_CANDIDATE.equals(type)){
+                events.onRemoteIceCandidate(toJavaCandidate(json));
+            }
         }catch (JSONException e){
             L.printException(e);
         }

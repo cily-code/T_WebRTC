@@ -116,6 +116,7 @@ public class PhoneWaitAc extends BaseAc3 {
         finish();
     }
 
+    private String iceCandidate;
     private void toVideo(){
         cancelTimer();
         stop();
@@ -123,6 +124,7 @@ public class PhoneWaitAc extends BaseAc3 {
         Bundle b = new Bundle();
         b.putString(Conf.EXTRA_ROOMID, roomId);
         b.putInt(Conf.INTENT_CALL_TYPE, type_call);
+        b.putString(Conf.INTENT_ICECANDIDATE, iceCandidate);
         toAc(VideoAc.class, b);
 
         if (BuildConfig.TYPE_APP == 0){
@@ -172,6 +174,7 @@ public class PhoneWaitAc extends BaseAc3 {
                         startTimer();
                         ll.setVisibility(View.VISIBLE);
                         type_call = code;
+                        iceCandidate = b.getContent();
                     }else if (code == Conf.ACTION_BUSY){
                         next("对方忙，请稍后呼叫");
                     }else if (code == Conf.ACTION_REFUSE){
@@ -250,7 +253,7 @@ public class PhoneWaitAc extends BaseAc3 {
     }
 
     private void play(){
-        if (BuildConfig.DEBUG && false){
+        if (BuildConfig.DEBUG){
             showToast("播放音乐");
         }else{
             if (player == null){

@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.cily.utils.app.utils.L;
 import com.cily.utils.app.utils.ScreenUtils;
 import com.cily.utils.app.utils.SpUtils;
@@ -25,6 +27,7 @@ import com.cily.utils.t_webrtc.BuildConfig;
 import com.cily.utils.t_webrtc.Conf;
 import com.cily.utils.t_webrtc.R;
 import com.cily.utils.t_webrtc.bean.ActionBean;
+import com.cily.utils.t_webrtc.bean.CallBean;
 import com.cily.utils.t_webrtc.client.CpuMonitor;
 import com.cily.utils.t_webrtc.client.PeerConnectionClient;
 import com.cily.utils.t_webrtc.event.RoomConnectionParameters;
@@ -82,13 +85,13 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
     private boolean useValueFromIntent = false;
 
     private PeerConnectionParameters peerParam;
-    private RoomConnectionParameters roomConnParam;
     private CpuMonitor cpuMonitor;
     private PeerConnectionClient peerClient;
 
     private String roomId;  //被呼叫者的物理房间号
     private String userRoom;
     private boolean fromPad = false;
+    private IceCandidate iceCandidate = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,6 +159,16 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         fromPad = getIntent().getBooleanExtra(Conf.INTENT_FROM_PAD, false);
         if (fromPad){
             initiator = true;
+        }else{
+            String ice = getIntent().getStringExtra(Conf.INTENT_ICECANDIDATE);
+            if (!StrUtils.isEmpty(ice)){
+                try{
+                    CallBean b = JSON.parseObject(ice, CallBean.class);
+                    iceCandidate = new IceCandidate(b.getId(), b.getLabel(), b.getCandidate());
+                }catch (JSONException e){
+                    L.printException(e);
+                }
+            }
         }
 
         userRoom = SpUtils.getStr(this, Conf.USER_ROOM, "");
@@ -256,14 +269,6 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
                 noAudioProcessing, aecDump, useOpenSLES,
                 disableBuiltInAEC, disableBuiltInAGC,
                 disableBuiltInNS, enableLevelControl, dateChannel);
-
-        if (fromPad){
-            roomConnParam = new RoomConnectionParameters(
-                    BuildConfig.URL_ROOM, roomId, Utils.loopback);
-        }else{
-            roomConnParam = new RoomConnectionParameters(
-                    BuildConfig.URL_ROOM, userRoom, Utils.loopback);
-        }
 
         cpuMonitor = new CpuMonitor(this);
         hudFragment.setCpuMonitor(cpuMonitor);
@@ -396,9 +401,9 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         }else{
             type_video = TYPE_ANSWER;
         }
-        SignalingParameters params = Utils.createSignalingParameters(type_video, userRoom, initiator);
+        SignalingParameters params = Utils.createSignalingParameters(type_video, userRoom,
+                initiator, iceCandidate);
         connectRoomInternal(createVideoCapture(), params, peerClient, rootEglBase, localRender, remoteRenderers );
-
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -507,7 +512,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
                             finish();
                         }else if (code == Conf.ACTION_USER_NOT_EXIST){
                             showToast("该房间为空号");
-                            finish();
+//                            finish();
                         }else if (code == Conf.ACTION_HUNG_UP){
                             showToast("聊天已结束");
                             finish();
