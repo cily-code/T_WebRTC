@@ -165,6 +165,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
                 try{
                     CallBean b = JSON.parseObject(ice, CallBean.class);
                     iceCandidate = new IceCandidate(b.getId(), b.getLabel(), b.getCandidate());
+                    sdp = b.getSdp();
                 }catch (JSONException e){
                     L.printException(e);
                 }
@@ -381,7 +382,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
                     startTimer();
                     Utils.sendCall(peerParam.loopback, userRoom, roomId, sdpe, iceCandi, initiator, VideoAc.this);
                 }else{
-                    Utils.senAnswer(peerParam.loopback, userRoom, roomId,  sdpe);
+                    Utils.senAnswer(peerParam.loopback, userRoom, roomId, sdpe, iceCandidate);
                 }
             }
         });
@@ -391,6 +392,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
     private final String TYPE_ANSWER = "ANSWER";
     private String type_video = TYPE_OFFER;
     private boolean initiator = true;  //initiator是否是发起人
+    private String sdp;
     private void startCall(){
         AudioManagerUtils.create(this);
         AudioManagerUtils.start();
@@ -401,7 +403,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
         }else{
             type_video = TYPE_ANSWER;
         }
-        SignalingParameters params = Utils.createSignalingParameters(type_video, userRoom,
+        SignalingParameters params = Utils.createSignalingParameters(type_video, sdp, userRoom,
                 initiator, iceCandidate);
         connectRoomInternal(createVideoCapture(), params, peerClient, rootEglBase, localRender, remoteRenderers );
     }
@@ -524,7 +526,7 @@ public class VideoAc extends BaseAc3 implements OnCallEvents, SignalingEvents {
                             showToast("同意接听");
                             cancelTimer();
                             stop();
-                            Utils.doAgree(b.getContent(), initiator, VideoAc.this);
+                            Utils.doAgree(b.getContent(), VideoAc.this);
                         }else if (code == Conf.ACTION_HOLD){
                             cancelTimer();
                         }

@@ -206,13 +206,13 @@ public class Utils {
     }
 
     //OFFER或者Answer
-    public static SignalingParameters createSignalingParameters(String type, String clientId,
+    public static SignalingParameters createSignalingParameters(String type, String sdp, String clientId,
                                                                 boolean initiator, IceCandidate iceCandidate){
         LinkedList<PeerConnection.IceServer> iceServers = new LinkedList<>();
         iceServers.add(new PeerConnection.IceServer("turn:119.23.251.238:3478", "helloword", "helloword"));
 
         SessionDescription offerSdp = new SessionDescription(
-                SessionDescription.Type.fromCanonicalForm(type), null);
+                SessionDescription.Type.fromCanonicalForm(type), sdp);
 
         LinkedList<IceCandidate> iceCandidates = new LinkedList<IceCandidate>();
         if (iceCandidate != null) {
@@ -235,34 +235,28 @@ public class Utils {
         CallBean b = new CallBean();
         b.setSdp(sdp.description);
 //        b.setType(TYPE_OFFER);
-        b.setType(TYPE_CANDIDATE);
+        b.setType(TYPE_OFFER);
         b.setId(candidate.sdpMid);
         b.setLabel(candidate.sdpMLineIndex);
         b.setCandidate(candidate.sdp);
 
-        if (loopback){
-            SessionDescription sd = new SessionDescription(
-                    SessionDescription.Type.fromCanonicalForm(TYPE_ANSWER),
-                    sdp.description);
-            if(events != null){
-                events.onRemoteDescription(sd);
-            }
+
+        SessionDescription sd = new SessionDescription(
+                SessionDescription.Type.fromCanonicalForm(TYPE_OFFER),
+                sdp.description);
+        if(events != null){
+            events.onRemoteDescription(sd);
         }
 
-        if (initiator){
-            if (loopback){
-                if (events != null){
-                    events.onRemoteIceCandidate(candidate);
-                }
-            }
+        if (events != null){
+            events.onRemoteIceCandidate(candidate);
         }
 
         WsUtils.sendMsg(StrMsgUtils.callVedio(userRoom, roomId, JSON.toJSONString(b)));
-
     }
 
-    public static void senAnswer(boolean loopback, String userRoom,
-                                 String roomId, SessionDescription sdp){
+    public static void senAnswer(boolean loopback, String userRoom, String roomId,
+                                 SessionDescription sdp, IceCandidate iceCandidate){
         if (loopback){
             L.i(TAG, "Sending answer n loopback mode.");
             return;
@@ -271,25 +265,26 @@ public class Utils {
         CallBean b = new CallBean();
         b.setType(TYPE_ANSWER);
         b.setSdp(sdp.description);
+        b.setId(iceCandidate.sdpMid);
+        b.setLabel(iceCandidate.sdpMLineIndex);
+        b.setCandidate(iceCandidate.sdp);
 
         WsUtils.sendMsg(StrMsgUtils.agree(userRoom, roomId, JSON.toJSONString(b)));
     }
 
-    public static void doAgree(String msg, boolean initiator, SignalingEvents events){
+    public static void doAgree(String msg, SignalingEvents events){
         try{
             JSONObject json = new JSONObject(msg);
             String type = json.optString("Type");
             if (TYPE_OFFER.equals(type)){
+                SessionDescription sdp = new SessionDescription(
+                        SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
+                if (events != null) {
                     events.onRemoteIceCandidate(toJavaCandidate(json));
 
-                    SessionDescription sdp = new SessionDescription(
-                            SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
-                    if (events != null) {
-                        events.onRemoteDescription(sdp);
-                    }
-
+                    events.onRemoteDescription(sdp);
+                }
             }else if(TYPE_ANSWER.equals(type)){
-
                 if (events != null){
                     SessionDescription sd = new SessionDescription(
                             SessionDescription.Type.fromCanonicalForm(type), json.getString("Sdp"));
@@ -299,7 +294,9 @@ public class Utils {
                 }
 
             }else if(TYPE_CANDIDATE.equals(type)){
-                events.onRemoteIceCandidate(toJavaCandidate(json));
+                if (events != null){
+                    events.onRemoteIceCandidate(toJavaCandidate(json));
+                }
             }
         }catch (JSONException e){
             L.printException(e);
